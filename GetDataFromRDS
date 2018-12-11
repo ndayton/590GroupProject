@@ -1,0 +1,70 @@
+class Dyn {
+    constructor() {
+        this.aws = require("aws-sdk");
+
+        this.aws.config.update({
+            region: "us-east-1",
+            endpoint: ENDPOINT,
+            accessKeyId: ACCESSKEY, 
+            secretAccessKey: SECRET
+        });
+
+        this.doc_client = new this.aws.DynamoDB.DocumentClient();
+
+        this.get_sales = this.get_sales.bind(this);
+    }
+
+    get_sales() {
+        // Since we need to refer to the Dyn object inside the callback of the promise, store the reference here
+        let this_bound = this;
+        let params = {
+            TableName: 'Sales'
+        }
+
+        let prom = new Promise(function(resolve, reject) {
+            this_bound.doc_client.scan(params, (err, data) => {
+                if (err) {
+                    reject(err);
+                }
+                else {
+                    let sorted_items = data.Items;
+                    sorted_items.sort((a, b) => {
+                        if (a.SaleId > b.SaleId) return 1;
+                        else return -1;
+                    });
+                    resolve(sorted_items);
+                }
+            });
+        });
+
+        return prom;
+    }
+
+    get_products() {
+        // Since we need to refer to the Dyn object inside the callback of the promise, store the reference here
+        let this_bound = this;
+        let params = {
+            TableName: 'ProductCatalog'
+        }
+
+        let prom = new Promise(function(resolve, reject) {
+            this_bound.doc_client.scan(params, (err, data) => {
+                if (err) {
+                    reject(err);
+                }
+                else {
+                    let sorted_items = data.Items;
+                    sorted_items.sort((a, b) => {
+                        if (a.SaleId > b.SaleId) return 1;
+                        else return -1;
+                    });
+                    resolve(sorted_items);
+                }
+            });
+        });
+
+        return prom;
+    }
+}
+
+export {Dyn};
