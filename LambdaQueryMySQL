@@ -1,0 +1,17 @@
+import pyodbc
+import sqlalchemy
+import time
+import pandas
+from IPython.display import display, clear_output
+engine = sqlalchemy.create_engine('mysql+pymysql://MasterUser1:56oOeRr2I9eg@inventory.cptytdeh1eu7.us-east-1.rds.amazonaws.com:3306/inventory')
+# engine.connect()
+
+num_dots = 1
+
+while 1 == 1:
+    num_dots = num_dots % 20
+    results = pandas.read_sql_query('SELECT ProductId, SUM(QuantityChange) AS \'Inventory On Hand\' FROM FactInventory GROUP BY PRoductID', engine)
+    clear_output(wait=True)
+    display(('.' * num_dots).strip('\''), results)
+    time.sleep(1)
+    num_dots = num_dots + 1
